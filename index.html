@@ -1,6 +1,30 @@
-<body style="background:#000; color:#fff; font-family:sans-serif; padding:20px;">
-  <h3>📰 LIVE NEWS:</h3>
-  <marquee scrollamount="5" style="font-size:1.5rem; background:#222; padding:10px;">
-    ••• Kucing oren berhasil panjat pohon toge ••• Minum kopi sambil melamun tingkatkan kreativitas ••• Cuaca hari ini cerah berawan •••
-  </marquee>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Live TV Stream</title>
+    <!-- Memanggil player video super ringan via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
+    <style>
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        #player { width: 100%; max-width: 800px; aspect-ratio: 16/9; }
+    </style>
+</head>
+<body>
+
+    <div id="player"></div>
+
+    <script>
+        var player = new Clappr.Player({
+            // Contoh di bawah adalah link streaming resmi DW News (Global/English)
+            source: "https://dwamdstream102.akamaized.net/hls/live/2014193/dwstream102/index.m3u8",
+            parentId: "#player",
+            width: "100%",
+            height: "100%",
+            autoPlay: true,
+            mute: true
+        });
+    </script>
+
 </body>
+</html>
