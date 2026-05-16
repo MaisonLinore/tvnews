@@ -1,12 +1,21 @@
 <!DOCTYPE html>
-<html style="margin:0; background:#000;">
-<body style="margin:0;">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Live News</title>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; }
+        iframe { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
 
-    <!-- Memutar langsung Live TV EuroNews Global -->
-    <video src="https://euronews-euronews-eng-paris.samsung.wurl.com/manifest/playlist.m3u8" 
-           controls autoplay muted poster="https://images.live.tv"
-           style="position:fixed; top:0; left:0; width:100%; height:100%; object-fit:contain;">
-    </video>
+    <!-- Embed Live Al Jazeera English via Dailymotion (Anti-Blokir) -->
+    <iframe 
+        src="https://www.dailymotion.com/embed/video/x2pi9g3?autoplay=1&mute=1" 
+        allow="autoplay; fullscreen" 
+        allowfullscreen>
+    </iframe>
 
 </body>
 </html>
