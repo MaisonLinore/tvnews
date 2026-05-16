@@ -1,20 +1,12 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Global TV Live</title>
-    <style>body { margin: 0; background: #000; overflow: hidden; }</style>
-</head>
-<body>
+<html style="margin:0; background:#000;">
+<body style="margin:0;">
 
-    <!-- Contoh Live Sky News (Ganti ID setelah /embed/ jika video mati) -->
-    <iframe 
-        width="100%" 
-        height="100%" 
-        src="https://www.youtube.com/embed/9AuqgIOfi90?autoplay=1&mute=1" 
-        style="position:fixed; top:0; left:0; width:100%; height:100%; border:none;"
-        allow="autoplay; encrypted-media" 
-        allowfullscreen>
-    </iframe>
+    <!-- Memutar langsung Live TV EuroNews Global -->
+    <video src="https://euronews-euronews-eng-paris.samsung.wurl.com/manifest/playlist.m3u8" 
+           controls autoplay muted poster="https://images.live.tv"
+           style="position:fixed; top:0; left:0; width:100%; height:100%; object-fit:contain;">
+    </video>
 
 </body>
 </html>
