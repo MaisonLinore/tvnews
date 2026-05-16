@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tvnews</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { background-color: #050a12; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; margin: 0; }
+        .card { background: #0c1524; border-radius: 16px; padding: 20px; margin-bottom: 15px; border: 1px solid #16253b; }
+        .title { color: #38bdf8; font-weight: bold; font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        
+        /* Desain Daftar Berita yang Bisa Diklik */
+        .news-item { display: block; padding: 12px 0; border-bottom: 1px solid #16253b; text-decoration: none; color: #ffffff; cursor: pointer; transition: background 0.2s; }
+        .news-item:last-child { border-bottom: none; }
+        .news-item:hover { background: #111e33; color: #38bdf8; }
+        .news-title { font-size: 14px; font-weight: 500; line-height: 1.4; }
+        .news-source { font-size: 11px; color: #64748b; margin-top: 4px; }
+        
+        /* Desain Kontainer Video */
+        .video-container { width: 100%; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+    <!-- KARTU BERITA -->
+    <div class="card">
+        <div class="title">🌐 Latest News</div>
+        <div id="news-list">
+            <!-- Berita otomatis diisi oleh JavaScript -->
+        </div>
+    </div>
+
+    <!-- KARTU LIVE STREAM -->
+    <div class="card">
+        <div class="title">📺 Live Stream</div>
+        <div class="video-container">
+            <video id="stream-player" controls autoplay muted playsinline></video>
+        </div>
+    </div>
+
+    <script>
+        // Data streaming siaran langsung berita bisnis & global (.m3u8)
+        const liveStreams = {
+            "Reuters": "https://wurl.tv",
+            "Bloomberg": "https://fastly.net",
+            "CNA": "https://amagi.tv"
+        };
+
+        // Data list teks berita yang tampil di layar
+        const newsArticles = [
+            { title: "AI Summit 2026: Global Leaders Sign Ethics Pact", source: "Reuters", key: "Reuters" },
+            { title: "Tech Stocks Rally on Strong Earnings", source: "Bloomberg", key: "Bloomberg" },
+            { title: "EU Approves Landmark AI Regulation", source: "BBC / CNA", key: "CNA" }
+        ];
+
+        const newsList = document.getElementById('news-list');
+        const video = document.getElementById('stream-player');
+        let hls = new Hls();
+
+        // Merender elemen HTML berita agar interaktif dan bisa diklik
+        function initNews() {
+            newsList.innerHTML = "";
+            newsArticles.forEach(article => {
+                const a = document.createElement('a');
+                a.className = 'news-item';
+                a.innerHTML = `
+                    <div class="news-title">${article.title}</div>
+                    <div class="news-source">${article.source}</div>
+                `;
+                
+                // Saat teks berita diklik, ganti URL streaming video di bawahnya
+                a.onclick = function(e) {
+                    e.preventDefault();
+                    changeLiveStream(liveStreams[article.key]);
+                };
+                newsList.appendChild(a);
+            });
+        }
+
+        // Fungsi pemutar video streaming hls (.m3u8)
+        function changeLiveStream(url) {
+            if (Hls.isSupported()) {
+                hls.destroy();
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.play();
+            }
+        }
+
+        // Jalankan program saat halaman dimuat
+        initNews();
+        changeLiveStream(liveStreams["Reuters"]); // Set default putar Reuters pertama kali
+    </script>
+</body>
+</html>
