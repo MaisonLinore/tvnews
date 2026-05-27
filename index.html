@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-time Intelligence Application</title>
+  <!-- Memanggil HLS Engine agar browser Android/Chrome bisa memutar berkas .m3u8 -->
+  <script src="https://jsdelivr.net"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+    body { background-color: #0b0f19; color: #f3f4f6; padding: 15px; display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: 0 auto; }
+    
+    .news-container, .stream-container { background-color: #0d1527; border: 1px solid #1e293b; border-radius: 16px; padding: 16px; }
+    .news-header, .stream-header { font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; }
+    .news-header::before, .stream-header::before { content: ""; display: inline-block; width: 4px; height: 16px; background-color: #3b82f6; border-radius: 2px; margin-right: 8px; }
+    
+    .news-nav, .button-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .nav-btn, .channel-btn { background: #0f172a; border: 1px solid #1e293b; color: #9ca3af; padding: 6px 12px; font-size: 11px; border-radius: 6px; cursor: pointer; }
+    .nav-btn.active, .channel-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+    .channel-btn.active { background-color: #1e3a8a; border-color: #3b82f6; }
+
+    .news-list { display: flex; flex-direction: column; gap: 12px; }
+    .news-item { text-decoration: none; color: inherit; display: block; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
+    .news-title { font-size: 13px; line-height: 1.4; margin-bottom: 4px; color: #e5e7eb; font-weight: 500; }
+    .news-meta { font-size: 10px; color: #9ca3af; display: flex; justify-content: space-between; }
+
+    .video-wrapper { width: 100%; background-color: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; }
+    video { width: 100%; height: 100%; object-fit: contain; }
+    .channel-info { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 10px; }
+    footer { text-align: center; font-size: 11px; color: #6b7280; margin-top: 5px; }
+    .loading { font-size: 12px; color: #9ca3af; text-align: center; padding: 10px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- MODULE 1: REAL-TIME NEWS (ENGLISH) -->
+  <div class="news-container">
+    <div class="news-header">🌐 Light News Feed</div>
+    <div class="news-nav">
+      <button class="nav-btn active" onclick="fetchLiveNews('business', this)">💼 Business (CNN)</button>
+      <button class="nav-btn" onclick="fetchLiveNews('sport', this)">⚽ Sport (BBC)</button>
+      <button class="nav-btn" onclick="fetchLiveNews('entertainment', this)">🎬 Entertainment (BBC)</button>
+    </div>
+    <div id="newsFeedList" class="news-list">
+      <div class="loading">Loading live intelligence...</div>
+    </div>
+  </div>
+
+  <!-- MODULE 2: LIVE STREAM PLAYER -->
+  <div class="stream-container">
+    <div class="stream-header">📺 Live Stream Feed</div>
+    <div class="button-group" id="channelButtons"></div>
+    <div class="video-wrapper">
+      <!-- Menggunakan tag HTML5 Video murni agar pemutaran berkas m3u8 stabil -->
+      <video id="videoPlayer" controls autoplay muted playsinline></video>
+    </div>
+    <div class="channel-info" id="currentChannelLabel">Channel: Loading...</div>
+  </div>
+
+  <footer>Real-time intelligence · Exos+ Agentic AI News</footer>
+
+  <!-- Memanggil file database eksternal channels.js Anda -->
+  <script src="channels.js"></script>
+
+  <script>
+    const buttonGroup = document.getElementById("channelButtons");
+    const videoElement = document.getElementById("videoPlayer");
+    const channelLabel = document.getElementById("currentChannelLabel");
+    let hlsEngine = new Hls();
+
+    // LOGIKA PEMUTAR STREAMS
+    function playStream(index, element) {
+      const selectedChannel = channels[index];
+      channelLabel.innerText = "Channel: " + selectedChannel.name;
+      
+      const allButtons = document.querySelectorAll(".channel-btn");
+      allButtons.forEach(btn => btn.classList.remove("active"));
+      element.classList.add("active");
+
+      if (Hls.isSupported()) {
+        hlsEngine.destroy();
+        hlsEngine = new Hls();
+        hlsEngine.loadSource(selectedChannel.url);
+        hlsEngine.attachMedia(videoElement);
+        hlsEngine.on(Hls.Events.MANIFEST_PARSED, () => videoElement.play());
+      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        // Fallback untuk browser iOS Safari
+        videoElement.src = selectedChannel.url;
+        videoElement.addEventListener('loadedmetadata', () => videoElement.play());
+      }
+    }
+
+    // Pembuatan menu tombol dinamis dari channels.js
+    if (typeof channels !== 'undefined') {
+      channels.forEach((ch, index) => {
+        const btn = document.createElement("button");
+        btn.className = "channel-btn";
+        btn.innerText = ch.name;
+        btn.onclick = function() { playStream(index, btn); };
+        buttonGroup.appendChild(btn);
+      });
+      // Jalankan RedBull TV secara default di awal
+      playStream(0, buttonGroup.children[0]);
+    }
+
+    // LOGIKA PEMANGGIL BERITA BAHASA INGGRIS (MENGGUNAKAN FEED PARSER JSON AMAN)
+    const rssSources = {
+      business: "https://rss2json.com",
+      sport: "https://rss2json.com",
+      entertainment: "https://rss2json.com"
+    };
+
+    async function fetchLiveNews(category, element) {
+      const feedList = document.getElementById("newsFeedList");
+      feedList.innerHTML = '<div class="loading">Updating live articles...</div>';
+      
+      const navButtons = document.querySelectorAll(".nav-btn");
+      navButtons.forEach(btn => btn.classList.remove("active"));
+      element.classList.add("active");
+
+      try {
+        const response = await fetch(rssSources[category]);
+        const data = await response.json();
+
+        if (data.status === 'ok' && data.items.length > 0) {
+          feedList.innerHTML = "";
+          const topStories = data.items.slice(0, 3);
+          
+          topStories.forEach(story => {
+            const sourceName = category === 'business' ? 'CNN Business' : 'BBC News';
+            const markup = `
+              <a href="${story.link}" target="_blank" class="news-item">
+                <div class="news-title">${story.title}</div>
+                <div class="news-meta">
+                  <span>⚡ ${sourceName}</span>
+                  <span>🕒 Real-time Feed</span>
+                </div>
+              </a>
+            `;
+            feedList.innerHTML += markup;
+          });
+        } else {
+          feedList.innerHTML = '<div class="loading">No news found under this tier.</div>';
+        }
+      } catch (err) {
+        feedList.innerHTML = '<div class="loading">Failed to load news due to cross-origin blocks.</div>';
+      }
+    }
+
+    // Jalankan feed awal secara otomatis
+    document.addEventListener("DOMContentLoaded", () => {
+      const startNavBtn = document.querySelector(".nav-btn");
+      fetchLiveNews('business', startNavBtn);
+    });
+  </script>
+</body>
+</html>
