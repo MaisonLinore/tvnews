@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Exos+ Agentic AI TV News · Media Singularity</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #05070f;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      background: #0b0e1a;
+      border-radius: 32px;
+      border: 1px solid #202436;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 18px 20px 8px 20px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-left: 4px solid #3b82f6;
+      margin-left: 16px;
+      color: #eef2ff;
+    }
+
+    /* News */
+    .news-nav {
+      padding: 8px 16px 0;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: #151a30;
+      border: none;
+      color: #b9c3e6;
+      padding: 6px 16px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .nav-btn.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .news-list {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .news-item {
+      background: #070a12;
+      border-radius: 20px;
+      padding: 12px;
+      text-decoration: none;
+      display: block;
+      border: 1px solid #23283e;
+    }
+
+    .news-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #f0f3fa;
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+
+    .news-meta {
+      font-size: 0.7rem;
+      color: #7c85a6;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Video + Slideshow */
+    .video-container {
+      position: relative;
+      background: #000;
+      margin: 12px 16px 16px;
+      border-radius: 24px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: black;
+    }
+
+    .slideshow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #010314, #09102a);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 15;
+      transition: opacity 0.4s;
+      backdrop-filter: blur(4px);
+      color: white;
+      padding: 20px;
+    }
+
+    .slideshow.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .slide {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      max-width: 280px;
+      animation: fade 0.5s ease;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .slide-icon {
+      font-size: 3rem;
+    }
+
+    .slide-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a5f3fc, #3b82f6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .slide-desc {
+      font-size: 0.85rem;
+      color: #cdd6f4;
+    }
+
+    .credit {
+      margin-top: 20px;
+      font-size: 0.7rem;
+      color: #6c7a9e;
+      border-top: 1px solid #2a2f4a;
+      padding-top: 12px;
+    }
+
+    .channel-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 16px;
+    }
+
+    .channel-btn {
+      background: #151a30;
+      border: none;
+      color: #b9c3e6;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+
+    .channel-btn.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .channel-info {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #8b92b0;
+      padding: 8px 16px 20px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.65rem;
+      color: #4b5568;
+      padding-bottom: 16px;
+    }
+
+    .loading-news {
+      text-align: center;
+      color: #7c85a6;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- NEWS CARD -->
+  <div class="card">
+    <div class="card-header">🌐 Exos+ Agentic News Feed</div>
+    <div class="news-nav">
+      <button class="nav-btn active" data-cat="business">💼 Business (CNN/Reuters)</button>
+      <button class="nav-btn" data-cat="sport">⚽ Sport (BBC)</button>
+      <button class="nav-btn" data-cat="entertainment">🎬 Entertainment (Hollywood Reporter)</button>
+    </div>
+    <div id="newsFeedList" class="news-list">
+      <div class="loading-news">Loading intelligence ...</div>
+    </div>
+  </div>
+
+  <!-- TV STREAM + SLIDESHOW KONSEP -->
+  <div class="card">
+    <div class="card-header">📡 Media Singularity · Live Stream</div>
+    <div class="channel-buttons" id="channelButtons"></div>
+    <div class="video-container" id="videoContainer">
+      <video id="videoPlayer" controls autoplay muted playsinline></video>
+      <!-- SLIDESHOW KONSEP EXOS+ AGENTIC AI -->
+      <div id="slideshow" class="slideshow">
+        <div class="slide active" data-slide="0">
+          <div class="slide-icon">🧠</div>
+          <div class="slide-title">Exos+ Agentic AI TV News</div>
+          <div class="slide-desc">The Media Singularity · Autonomous intelligence · Real-time curation</div>
+        </div>
+        <div class="slide" data-slide="1">
+          <div class="slide-icon">⚡</div>
+          <div class="slide-title">Low Energy · DCO</div>
+          <div class="slide-desc">Data‑Centric Operations · Carbon‑aware streaming · Efficient AI</div>
+        </div>
+        <div class="slide" data-slide="2">
+          <div class="slide-icon">🌱</div>
+          <div class="slide-title">ESG · Sustainability</div>
+          <div class="slide-desc">Environmental, Social, Governance framework · Green media tech</div>
+        </div>
+        <div class="slide" data-slide="3">
+          <div class="slide-icon">🔒</div>
+          <div class="slide-title">IP Protected by Edwin Mirfazli</div>
+          <div class="slide-desc">© 2026 · Exos+ Singularity Engine</div>
+        </div>
+        <div class="credit">✨ Click any channel to start live stream ✨</div>
+      </div>
+    </div>
+    <div class="channel-info" id="currentChannelLabel">📡 Select a channel to watch live</div>
+  </div>
+  <footer>🧠 Agentic AI · Media Singularity · Exos+ DCO · Low‑Latency HLS</footer>
+</div>
+
+<script>
+  // ======================= STREAM TV (diperbarui dengan URL yang lebih stabil) =======================
+  const channels = [
+    { name: "RedBull TV", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+    { name: "Sky News", url: "https://skynews-ww-live.akamaized.net/hls/live/2003256/skynews-ww/index.m3u8" },
+    { name: "DW News", url: "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/playlist.m3u8" },
+    { name: "NASA Live", url: "https://ntv1.akamaized.net/hls/live/2016815/NASA_NTV1_2/master.m3u8" },
+    { name: "France 24", url: "https://france24-hls-live.akamaized.net/live/france24_en/hls_2m/playlist.m3u8" }
+  ];
+
+  // ======================= FEED BERITA (Business: NYTimes + fallback Reuters) =======================
+  const feedConfig = {
+    business: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+    sport: "http://feeds.bbci.co.uk/sport/rss.xml",
+    entertainment: "https://www.hollywoodreporter.com/feed/"
+  };
+  const RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
+
+  // DOM
+  const videoEl = document.getElementById("videoPlayer");
+  const channelLabel = document.getElementById("currentChannelLabel");
+  const channelContainer = document.getElementById("channelButtons");
+  const newsContainer = document.getElementById("newsFeedList");
+  const slideshowDiv = document.getElementById("slideshow");
+
+  let currentHls = null;
+  let slideInterval = null;
+  let currentSlide = 0;
+  const slides = document.querySelectorAll(".slide");
+
+  // ========== SLIDESHOW (berulang 4 slide) ==========
+  function startSlideshow() {
+    if (slideInterval) clearInterval(slideInterval);
+    currentSlide = 0;
+    function showSlide(index) {
+      slides.forEach((s, i) => {
+        if (i === index) s.classList.add("active");
+        else s.classList.remove("active");
+      });
+    }
+    showSlide(0);
+    slideInterval = setInterval(() => {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }, 5000);
+  }
+
+  function stopSlideshow() {
+    if (slideInterval) clearInterval(slideInterval);
+    slideInterval = null;
+  }
+
+  // ========== VIDEO STREAM (HLS) ==========
+  function playStream(channel) {
+    if (!channel || !channel.url) return;
+    channelLabel.innerText = `📡 Now streaming: ${channel.name}`;
+    if (currentHls) {
+      currentHls.destroy();
+      currentHls = null;
+    }
+    const streamUrl = channel.url;
+    if (Hls && Hls.isSupported()) {
+      currentHls = new Hls({ enableWorker: true, lowLatencyMode: true });
+      currentHls.loadSource(streamUrl);
+      currentHls.attachMedia(videoEl);
+      currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoEl.play().catch(e => console.warn("autoplay blocked", e));
+      });
+      currentHls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          console.error("HLS Error", data);
+          channelLabel.innerText = `⚠️ Stream offline: ${channel.name}. Try another channel.`;
+        }
+      });
+    } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+      videoEl.src = streamUrl;
+      videoEl.play().catch(e => console.log(e));
+    } else {
+      channelLabel.innerText = "❌ HLS not supported";
+    }
+  }
+
+  // Buat tombol channel, tanpa auto-play stream (slideshow tetap berjalan)
+  function buildChannelButtons() {
+    channelContainer.innerHTML = "";
+    channels.forEach((ch, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "channel-btn";
+      btn.innerText = ch.name;
+      btn.onclick = () => {
+        // Hentikan slideshow dan sembunyikan overlay
+        if (slideshowDiv && !slideshowDiv.classList.contains("hide")) {
+          stopSlideshow();
+          slideshowDiv.classList.add("hide");
+        }
+        document.querySelectorAll(".channel-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        playStream(ch);
+      };
+      channelContainer.appendChild(btn);
+    });
+    // Tidak memulai stream apapun secara default. Slideshow berjalan.
+  }
+
+  // ========== BERITA ==========
+  async function fetchNews(category, activeBtn) {
+    newsContainer.innerHTML = '<div class="loading-news">⏳ Fetching latest news ...</div>';
+    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+    if (activeBtn) activeBtn.classList.add("active");
+
+    let rssUrl = feedConfig[category];
+    if (!rssUrl) {
+      newsContainer.innerHTML = '<div class="loading-news">Invalid category</div>';
+      return;
+    }
+
+    const tryFetch = async (url) => {
+      const proxyUrl = `${RSS2JSON}${encodeURIComponent(url)}`;
+      const res = await fetch(proxyUrl);
+      const data = await res.json();
+      if (data.status === "ok" && data.items && data.items.length > 0) return data;
+      return null;
+    };
+
+    try {
+      let data = await tryFetch(rssUrl);
+      // Fallback untuk business jika NYTimes gagal
+      if (category === "business" && (!data || data.items.length === 0)) {
+        console.log("Fallback ke Reuters Business");
+        data = await tryFetch("https://feeds.reuters.com/reuters/businessNews");
+      }
+      if (!data || data.status !== "ok" || !data.items.length) {
+        newsContainer.innerHTML = '<div class="loading-news">⚠️ No news at the moment. Try again later.</div>';
+        return;
+      }
+      const articles = data.items.slice(0, 5);
+      newsContainer.innerHTML = "";
+      articles.forEach(article => {
+        let sourceName = "";
+        if (category === "business") sourceName = "NYTimes Business / Reuters";
+        else if (category === "sport") sourceName = "BBC Sport";
+        else sourceName = "Hollywood Reporter";
+
+        const el = document.createElement("a");
+        el.className = "news-item";
+        el.href = article.link;
+        el.target = "_blank";
+        el.innerHTML = `
+          <div class="news-title">${escapeHtml(article.title)}</div>
+          <div class="news-meta">
+            <span>⚡ ${sourceName}</span>
+            <span>🕒 ${article.pubDate ? formatTime(article.pubDate) : "Latest"}</span>
+          </div>
+        `;
+        newsContainer.appendChild(el);
+      });
+    } catch (err) {
+      console.error(err);
+      newsContainer.innerHTML = '<div class="loading-news">🌐 Network error. Reload page.</div>';
+    }
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function formatTime(dateStr) {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch(e) { return "now"; }
+  }
+
+  // Init news buttons
+  function initNewsButtons() {
+    const btns = document.querySelectorAll(".nav-btn");
+    btns.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const cat = btn.getAttribute("data-cat");
+        fetchNews(cat, btn);
+      });
+    });
+    // Load default: business
+    const defaultBtn = document.querySelector(".nav-btn.active");
+    fetchNews("business", defaultBtn);
+  }
+
+  // ========== INIT ==========
+  document.addEventListener("DOMContentLoaded", () => {
+    buildChannelButtons();    // membuat tombol, tidak memutar stream
+    startSlideshow();         // slideshow berjalan di area video
+    initNewsButtons();        // berita business tampil
+
+    // Opsional: jika user mengklik area slideshow, jangan langsung hilang (kecuali pilih channel)
+    slideshowDiv.addEventListener("click", (e) => {
+      if (e.target === slideshowDiv || e.target.classList.contains("credit")) {
+        // tidak melakukan apa-apa, slideshow tetap
+      }
+    });
+  });
+</script>
+</body>
+</html>
