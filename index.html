@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Agentic AI TV News · Media Singularity</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0c12;
+      font-family: 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* CARDS */
+    .card {
+      background: #0f1222;
+      border-radius: 32px;
+      border: 1px solid #23273f;
+      overflow: hidden;
+      backdrop-filter: blur(2px);
+      transition: all 0.2s ease;
+    }
+
+    .card-header {
+      padding: 18px 20px 8px 20px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 4px solid #3b82f6;
+      margin-left: 16px;
+      color: #f0f3fa;
+    }
+
+    /* News section */
+    .news-nav {
+      padding: 8px 16px 0 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: #191e32;
+      border: none;
+      color: #b9c3e6;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .nav-btn.active {
+      background: #3b82f6;
+      color: white;
+      box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+    }
+
+    .news-list {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .news-item {
+      background: #0b0e1a;
+      border-radius: 20px;
+      padding: 14px;
+      text-decoration: none;
+      display: block;
+      border: 1px solid #24283e;
+      transition: 0.2s;
+    }
+
+    .news-item:hover {
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+    }
+
+    .news-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #eef2ff;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .news-meta {
+      font-size: 0.7rem;
+      color: #7c85a6;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Video Player + Overlay */
+    .video-container {
+      position: relative;
+      background: #000;
+      border-radius: 24px;
+      overflow: hidden;
+      margin: 12px 16px 16px 16px;
+      aspect-ratio: 16 / 9;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: black;
+    }
+
+    /* OVERLAY KONSEP AGENTIC AI (MEDIA SINGULARITY) */
+    .singularity-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #010314dd, #03071cdd);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 24px;
+      z-index: 20;
+      transition: opacity 0.5s ease;
+      color: white;
+      font-family: monospace;
+    }
+
+    .singularity-overlay.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .singularity-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a5f3fc, #3b82f6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .pillars {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .pillar {
+      background: rgba(59,130,246,0.2);
+      backdrop-filter: blur(4px);
+      border-radius: 60px;
+      padding: 8px 18px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: 1px solid #3b82f6;
+    }
+
+    .desc {
+      font-size: 0.8rem;
+      max-width: 280px;
+      margin: 12px auto;
+      color: #ccd6f6;
+    }
+
+    .launch-btn {
+      background: #3b82f6;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .launch-btn:hover {
+      background: #2563eb;
+      transform: scale(1.02);
+    }
+
+    .channel-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px;
+    }
+
+    .channel-btn {
+      background: #191e32;
+      border: none;
+      color: #b9c3e6;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+
+    .channel-btn.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .channel-info {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #8b92b0;
+      padding: 8px 16px 20px 16px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.65rem;
+      color: #4b5568;
+      padding-bottom: 16px;
+    }
+
+    .loading-news {
+      text-align: center;
+      color: #7c85a6;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <!-- NEWS CARD -->
+  <div class="card">
+    <div class="card-header">🌐 Agentic AI News Feed</div>
+    <div class="news-nav">
+      <button class="nav-btn active" data-cat="business">📈 Business (CNN)</button>
+      <button class="nav-btn" data-cat="sport">⚽ Sport (BBC)</button>
+      <button class="nav-btn" data-cat="entertainment">🎬 Entertainment (Hollywood Reporter)</button>
+    </div>
+    <div id="newsFeedList" class="news-list">
+      <div class="loading-news">Loading intelligence ...</div>
+    </div>
+  </div>
+
+  <!-- TV STREAM + SINGULARITY OVERLAY -->
+  <div class="card">
+    <div class="card-header">📡 Media Singularity · Live Stream</div>
+    <div class="channel-buttons" id="channelButtons"></div>
+    <div class="video-container" id="videoContainer">
+      <video id="videoPlayer" controls autoplay muted playsinline poster="https://placehold.co/1280x720/0a0c1a/3b82f6?text=Agentic+AI+TV"></video>
+      <!-- OVERLAY KONSEP MEDIA SINGULARITY (Low Energy, DCO, ESG, Sustainability) -->
+      <div id="singularityOverlay" class="singularity-overlay">
+        <div class="singularity-title">⚡ MEDIA SINGULARITY ⚡</div>
+        <div style="font-size:0.9rem; font-weight:300;">Agentic AI TV News · The Next Evolution</div>
+        <div class="pillars">
+          <span class="pillar">🌱 Low Energy</span>
+          <span class="pillar">🔗 DCO (Data-Centric Ops)</span>
+          <span class="pillar">🌍 ESG Framework</span>
+          <span class="pillar">♻️ Sustainability</span>
+        </div>
+        <div class="desc">
+          Real‑time intelligence · Autonomous curation · Carbon‑aware streaming
+        </div>
+        <button class="launch-btn" id="launchExperience">🚀 Launch Experience →</button>
+      </div>
+    </div>
+    <div class="channel-info" id="currentChannelLabel">📡 Awaiting signal</div>
+  </div>
+  <footer>🧠 Agentic AI · Media Singularity · Low‑Latency HLS</footer>
+</div>
+
+<script>
+  // ======================= 1. STREAM TV (URL M3U8 YANG SUDAH DIPERBAIKI) =======================
+  // Hanya RedBull yang sebelumnya jalan, sekarang semua diganti ke stream publik yang aktif.
+  const channels = [
+    { name: "RedBull TV", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+    { name: "Sky News", url: "https://linear16-lh.akamaihd.net/i/skynews_1@189614/index_0_av.m3u8" },
+    { name: "DW News", url: "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/playlist.m3u8" },
+    { name: "NASA Live", url: "https://ntv1.akamaized.net/hls/live/2016815/NASA_NTV1_2/master.m3u8" },
+    { name: "France 24 English", url: "https://france24-hls-live.akamaized.net/live/france24_en/hls_2m/playlist.m3u8" }
+  ];
+
+  // ======================= 2. RSS FEEDS (DIPERBAIKI) =======================
+  // Business: CNN Money (alternatif + fallback)
+  // Sport: BBC Sport
+  // Entertainment: Hollywood Reporter (bukan BBC)
+  const feedConfig = {
+    business: "https://rss.cnn.com/rss/money_news_international.rss",
+    sport: "http://feeds.bbci.co.uk/sport/rss.xml",
+    entertainment: "https://www.hollywoodreporter.com/feed/"
+  };
+  const RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
+
+  // DOM elements
+  const videoEl = document.getElementById("videoPlayer");
+  const channelLabel = document.getElementById("currentChannelLabel");
+  const channelContainer = document.getElementById("channelButtons");
+  const newsContainer = document.getElementById("newsFeedList");
+  const overlay = document.getElementById("singularityOverlay");
+  const launchBtn = document.getElementById("launchExperience");
+
+  let currentHls = null;
+
+  // ========== FUNGSI VIDEO PLAYER (HLS) ==========
+  function playStream(channel) {
+    if (!channel || !channel.url) return;
+    channelLabel.innerText = `📡 Now playing: ${channel.name}`;
+    if (currentHls) {
+      currentHls.destroy();
+      currentHls = null;
+    }
+    const streamUrl = channel.url;
+    if (Hls && Hls.isSupported()) {
+      currentHls = new Hls({ enableWorker: true, lowLatencyMode: true });
+      currentHls.loadSource(streamUrl);
+      currentHls.attachMedia(videoEl);
+      currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoEl.play().catch(e => console.warn("autoplay blocked", e));
+      });
+      currentHls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          console.error("HLS Error", data);
+          channelLabel.innerText = `⚠️ Stream offline: ${channel.name}`;
+        }
+      });
+    } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+      videoEl.src = streamUrl;
+    } else {
+      channelLabel.innerText = "❌ HLS not supported";
+    }
+  }
+
+  // Buat tombol channel
+  function buildChannelButtons() {
+    channelContainer.innerHTML = "";
+    channels.forEach((ch, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "channel-btn";
+      btn.innerText = ch.name;
+      btn.onclick = () => {
+        document.querySelectorAll(".channel-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        playStream(ch);
+      };
+      channelContainer.appendChild(btn);
+    });
+    // Aktifkan channel pertama (RedBull)
+    if (channels.length) {
+      const firstBtn = channelContainer.children[0];
+      firstBtn.classList.add("active");
+      playStream(channels[0]);
+    }
+  }
+
+  // ========== FUNGSI BERITA (CNN BUSINESS DIPERBAIKI) ==========
+  async function fetchNews(category, activeBtn) {
+    newsContainer.innerHTML = '<div class="loading-news">📡 Fetching latest news ...</div>';
+    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+    if (activeBtn) activeBtn.classList.add("active");
+
+    let rssUrl = feedConfig[category];
+    if (!rssUrl) {
+      newsContainer.innerHTML = '<div class="loading-news">Invalid category</div>';
+      return;
+    }
+
+    // Khusus business: jika CNN gagal, kita coba fallback ke Reuters
+    const tryFetch = async (url) => {
+      const proxyUrl = `${RSS2JSON}${encodeURIComponent(url)}`;
+      const res = await fetch(proxyUrl);
+      const data = await res.json();
+      if (data.status === "ok" && data.items && data.items.length > 0) return data;
+      return null;
+    };
+
+    try {
+      let data = await tryFetch(rssUrl);
+      // Jika business dan data kosong, fallback ke Reuters Business
+      if (category === "business" && (!data || data.items.length === 0)) {
+        console.log("CNN RSS fallback ke Reuters");
+        data = await tryFetch("https://feeds.reuters.com/reuters/businessNews");
+      }
+      if (!data || data.status !== "ok" || !data.items.length) {
+        newsContainer.innerHTML = '<div class="loading-news">⚠️ No news at this moment. Try later.</div>';
+        return;
+      }
+
+      const articles = data.items.slice(0, 5);
+      newsContainer.innerHTML = "";
+      articles.forEach(article => {
+        let sourceName = "";
+        if (category === "business") sourceName = "CNN Business / Reuters";
+        else if (category === "sport") sourceName = "BBC Sport";
+        else sourceName = "Hollywood Reporter";
+
+        const el = document.createElement("a");
+        el.className = "news-item";
+        el.href = article.link;
+        el.target = "_blank";
+        el.innerHTML = `
+          <div class="news-title">${escapeHtml(article.title)}</div>
+          <div class="news-meta">
+            <span>⚡ ${sourceName}</span>
+            <span>🕒 ${article.pubDate ? formatTime(article.pubDate) : "Now"}</span>
+          </div>
+        `;
+        newsContainer.appendChild(el);
+      });
+    } catch (err) {
+      console.error(err);
+      newsContainer.innerHTML = '<div class="loading-news">🌐 Network error. Please reload.</div>';
+    }
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function formatTime(dateStr) {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch(e) { return "latest"; }
+  }
+
+  // ========== OVERLAY SINGULARITY (KONSEP AGENTIC AI) ==========
+  function initSingularityOverlay() {
+    // Secara default overlay tampil, video belum bisa diinteraksi? Tidak, video tetap berjalan di belakang tapi user lihat overlay.
+    // Kita beri tombol atau auto-hide setelah 6 detik.
+    let autoHideTimer = setTimeout(() => {
+      overlay.classList.add("hide");
+    }, 6000);
+
+    launchBtn.addEventListener("click", () => {
+      clearTimeout(autoHideTimer);
+      overlay.classList.add("hide");
+    });
+
+    // Klik overlay juga bisa hide (opsional)
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay || e.target.classList.contains("launch-btn") === false) {
+        overlay.classList.add("hide");
+        clearTimeout(autoHideTimer);
+      }
+    });
+  }
+
+  // ========== INIT ALL ==========
+  function initNewsButtons() {
+    const btns = document.querySelectorAll(".nav-btn");
+    btns.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const cat = btn.getAttribute("data-cat");
+        fetchNews(cat, btn);
+      });
+    });
+    // Load default: business
+    const defaultBtn = document.querySelector(".nav-btn.active");
+    if (defaultBtn) fetchNews("business", defaultBtn);
+    else fetchNews("business", null);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    buildChannelButtons();
+    initNewsButtons();
+    initSingularityOverlay();
+  });
+</script>
+</body>
+</html>
