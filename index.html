@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-time Intelligence & Stream Feed</title>
+  <style>
+    /* GLOBAL CORE STYLE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0b0f19;
+      color: #f3f4f6;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* CONTAINER 1: LIVE NEWS INTEL */
+    .news-container {
+      background-color: #0d1527;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .news-header {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .news-header::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 16px;
+      background-color: #3b82f6;
+      border-radius: 2px;
+      margin-right: 8px;
+    }
+
+    /* NEWS SELECTION NAV BAR */
+    .news-nav {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .nav-btn {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      color: #9ca3af;
+      padding: 5px 10px;
+      font-size: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn.active {
+      background: #3b82f6;
+      color: #ffffff;
+      border-color: #3b82f6;
+    }
+
+    /* INTERACTIVE NEWS FEED */
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .news-item {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 10px;
+      transition: opacity 0.15s ease;
+    }
+
+    .news-item:hover {
+      opacity: 0.75;
+    }
+
+    .news-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .news-title {
+      font-size: 13.5px;
+      line-height: 1.4;
+      margin-bottom: 5px;
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .news-meta {
+      font-size: 10.5px;
+      color: #9ca3af;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* CONTAINER 2: LIVE STREAM PLAYER */
+    .stream-container {
+      background-color: #0d1527;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .stream-header {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .stream-header::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 16px;
+      background-color: #3b82f6;
+      border-radius: 2px;
+      margin-right: 8px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .channel-btn {
+      background-color: #0f172a;
+      border: 1px solid #1e293b;
+      color: #9ca3af;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .channel-btn.active {
+      background-color: #1e3a8a;
+      border-color: #3b82f6;
+      color: #ffffff;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      height: 0;
+      background-color: #000000;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .channel-info {
+      text-align: center;
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 10px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 5px;
+    }
+
+    .loading-text {
+      font-size: 12px;
+      color: #9ca3af;
+      text-align: center;
+      padding: 15px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- DYNAMIC LIVE NEWS MODULE -->
+  <div class="news-container">
+    <div class="news-header">🌐 Light News Feed</div>
+    
+    <!-- Global Category Filter -->
+    <div class="news-nav">
+      <button class="nav-btn active" onclick="fetchLiveNews('business', this)">💼 Business (CNN)</button>
+      <button class="nav-btn" onclick="fetchLiveNews('sport', this)">⚽ Sport (ESPN)</button>
+      <button class="nav-btn" onclick="fetchLiveNews('entertainment', this)">🎬 Entertainment (BBC)</button>
+    </div>
+
+    <!-- Active Real-time Articles Layout -->
+    <div id="newsFeedList" class="news-list">
+      <div class="loading-text">Connecting to global intelligence engines...</div>
+    </div>
+  </div>
+
+  <!-- MULTI-CHANNEL LIVE VIDEO MODULE -->
+  <div class="stream-container">
+    <div class="stream-header">📺 Live Stream Feed</div>
+    <div class="button-group" id="channelButtons"></div>
+    <div class="video-wrapper">
+      <iframe id="videoPlayer" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+    <div class="channel-info" id="currentChannelLabel">Channel: Initializing...</div>
+  </div>
+
+  <!-- FOOTER DESCRIPTOR -->
+  <footer>Real-time intelligence · Exos+ Agentic AI News</footer>
+
+  <script>
+    // 1. COMPREHENSIVE STREAMING CHANNELS ENGINE (GITHUB SYSTEM COMPATIBLE)
+    const channels = [
+      { name: "RedBull TV", url: "https://twitch.tv" },
+      { name: "DW News", url: "https://youtube.com" },
+      { name: "NASA Live", url: "https://ustream.tv" },
+      { name: "Sky News", url: "https://dailymotion.com" },
+      { name: "GB News", url: "https://dailymotion.com" }
+    ];
+
+    const buttonGroup = document.getElementById("channelButtons");
+    const videoPlayer = document.getElementById("videoPlayer");
+    const channelLabel = document.getElementById("currentChannelLabel");
+
+    function updateActiveChannel(index, element) {
+      videoPlayer.src = channels[index].url;
+      channelLabel.innerText = "Channel: " + channels[index].name;
+      const allButtons = document.querySelectorAll(".channel-btn");
+      allButtons.forEach(btn => btn.classList.remove("active"));
+      element.classList.add("active");
+    }
+
+    channels.forEach((ch, index) => {
+      const btn = document.createElement("button");
+      btn.className = "channel-btn";
+      btn.innerText = ch.name;
+      btn.onclick = function() { updateActiveChannel(index, btn); };
+      buttonGroup.appendChild(btn);
+    });
+
+    // Default Initialization to DW News (Index 1) for immediate layout stability
+    updateActiveChannel(1, buttonGroup.children[1]);
+
+
+    // 2. UNBIASED AUTOMATIC REAL-TIME NEWS LOADER ENGINE
+    // Utilizing secure public pipelines to parse genuine global RSS syndication directly into the browser
+    const networkFeeds = {
+      business: "https://rss2json.com",
+      sport: "https://rss2json.com",
+      entertainment: "https://rss2json.com"
+    };
+
+    async function fetchLiveNews(category, element) {
+      const displayContainer = document.getElementById("newsFeedList");
+      displayContainer.innerHTML = '<div class="loading-text">Fetching latest worldwide headlines...</div>';
+      
+      const filterButtons = document.querySelectorAll(".nav-btn");
+      filterButtons.forEach(btn => btn.classList.remove("active"));
+      element.classList.add("active");
+
+      try {
+        const fetchUrl = networkFeeds[category];
+        const connection = await fetch(fetchUrl);
+        const structure = await connection.json();
+
+        if (structure.status === 'ok' && structure.items.length > 0) {
+          displayContainer.innerHTML = ""; // Clear loader text
+          
+          // Isolate top 3 live global stories
+          const coreItems = structure.items.slice(0, 3);
+          
+          coreItems.forEach(story => {
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+            const timestamp = new Date(story.pubDate).toLocaleTimeString('en-US', timeOptions);
+            
+            let branding = "BBC News";
+            if (category === 'business') branding = "CNN Business";
+            if (category === 'sport') branding = "ESPN Network";
+
+            // True clickable link mapping utilizing global target tags
+            const markup = `
+              <a href="${story.link}" target="_blank" class="news-item">
+                <div class="news-title">${story.title}</div>
+                <div class="news-meta">
+                  <span>⚡ ${branding}</span>
+                  <span>🕒 ${timestamp}</span>
+                </div>
+              </a>
+            `;
+            displayContainer.innerHTML += markup;
+          });
+        } else {
+          displayContainer.innerHTML = '<div class="loading-text">Could not sync content. Try again shortly.</div>';
+        }
+      } catch (err) {
+        displayContainer.innerHTML = '<div class="loading-text">Network error loading live streams.</div>';
+      }
+    }
+
+    // Auto-fire Business category on load
+    document.addEventListener("DOMContentLoaded", () => {
+      const defaultSelector = document.querySelector(".nav-btn");
+      fetchLiveNews('business', defaultSelector);
+    });
+  </script>
+
+</body>
+</html>
